@@ -14,9 +14,6 @@ public class HttpServer {
 
     public static final String SHUTDOWM_CMD = "/SHUTDOWN";
 
-    public static final String WEB_ROOT = System.getProperty("user.dir")
-            + File.separator + "target/classes/webroot";
-
     private boolean shutdown = false;
 
     public static void main(String[] args) {
@@ -55,7 +52,17 @@ public class HttpServer {
                 //create Response Object
                 Response response = new Response(output);
                 response.setRequest(request);
-                response.sendStaticResource();
+
+                //check if this is a request for a servlet
+                //or a static resource
+                //a request for a servlet begins with "/servlet/"
+                if(request.getUri().startsWith("/servlet/")){
+                    ServletProcessor processor = new ServletProcessor();
+                    processor.process(request,response);
+                } else {
+                    StaticResourceProcessor processor = new StaticResourceProcessor();
+                    processor.process(request,response);
+                }
 
                 //close the socket
                 socket.close();
